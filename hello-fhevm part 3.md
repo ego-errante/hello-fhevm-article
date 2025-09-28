@@ -285,16 +285,3 @@ Before we conclude, let's add the shared utilities in `packages/site/lib` direct
 ```typescript:hello-fhevm-client/packages/site/lib/constants.ts
 // This file defines shared constants, such as move names and game outcomes.
 ```
-
-## Others
-
-- tests
-- extending functionality
-- ensure consistency in header pattern and language
-
-## References
-
-1. [Zama FHEVM Whitepaper](https://github.com/zama-ai/fhevm/blob/main/fhevm-whitepaper.pdf)
-2. [Zama Protocol Litepaper](https://docs.zama.ai/protocol/zama-protocol-litepaper#technical-details)
-3. [Zama Solidity Guides](https://docs.zama.ai/protocol/solidity-guides/)
-4. [Rock-paper-scissors - Wikipedia](https://en.wikipedia.org/wiki/Rock_paper_scissors)
