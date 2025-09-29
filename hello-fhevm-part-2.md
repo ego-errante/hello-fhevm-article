@@ -79,6 +79,8 @@ Let take them one at a time:
 - `_games` - this holds all games in the smart contract. Whenever a game is created, it is added to this list.
 - `_nextGameId` - is a simple id generation mechanism. It generates incremental ids for new games.
 
+![Rock Paper Scissors Game Lifecycle](./rockpaperscissors-lifecycle.svg)
+
 **Events**
 
 We'll emit events at key points of a game's lifecycle. This allows us to update the frontend in response to those events. If we wanted to make the frontend responsive without these events, the frontend would have to poll the network regularly e.g every 3 seconds. This is a much cleaner approach.
