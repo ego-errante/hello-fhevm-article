@@ -1846,7 +1846,7 @@ import { LuLoaderCircle } from "react-icons/lu";
 import { GAME_STATUS, GAME_ROLE } from "@/lib/constants";
 import { GameButton, ButtonContainer } from "./GameButton";
 import { GameResultDetails } from "./GameResult";
-import { GameRole } from "@/lib/types";
+import { GameData, GameRole } from "@/lib/types";
 
 export function GameStatusBoxSection({
   gameState,
@@ -1968,7 +1968,7 @@ export function Player1View({ gameData, actions, uiState }: Player1ViewProps) {
 
       {gameData.status === GAME_STATUS.RESOLVED && (
         <div>
-          <span className="font-medium">Opponent's move:</span>
+          <span className="font-medium">Opponent&apos;s move:</span>
           <div className="flex items-center gap-1 mt-1">
             <FaLock className="size-3" />
             <p>Hidden</p>
@@ -2043,7 +2043,7 @@ export function Player2View({ gameData, actions, uiState }: Player2ViewProps) {
         <p className="font-mono break-all mt-1">{gameData.player1}</p>
       </div>
       <div>
-        <span className="font-medium">Opponent's move:</span>
+        <span className="font-medium">Opponent&apos;s move:</span>
         <div className="flex items-center gap-1">
           <FaLock className="size-3" />
           <p>Hidden</p>
@@ -2131,7 +2131,7 @@ export function SpectatorView({
 }
 
 interface GameState {
-  gameData: any;
+  gameData: GameData | null;
   gameId: bigint | null;
   userGameRole: GameRole;
   gameResult: string | null;
@@ -2159,19 +2159,19 @@ interface ModalControls {
 }
 
 interface Player1ViewProps {
-  gameData: any;
+  gameData: GameData;
   actions: GameActions;
   uiState: GameUiState;
 }
 
 interface Player2ViewProps {
-  gameData: any;
+  gameData: GameData;
   actions: GameActions;
   uiState: GameUiState;
 }
 
 interface SpectatorViewProps {
-  gameData: any;
+  gameData: GameData;
   modalControls: ModalControls;
   uiState: GameUiState;
 }
@@ -2528,6 +2528,7 @@ import { ethers } from "ethers";
 import { printProperty } from "./DataDisplay";
 import { FaBook, FaChevronDown } from "react-icons/fa";
 import { useState } from "react";
+import { FhevmInstance } from "@fhevm/react";
 
 export function ChainInfoSection({
   chainId,
@@ -2557,7 +2558,8 @@ export function ChainInfoSection({
       {printProperty(
         "Signer",
         ethersSigner
-          ? (ethersSigner as any).address || "Signer available"
+          ? (ethersSigner as unknown as { address: string }).address ||
+              "Signer available"
           : "No signer"
       )}
 
@@ -2573,14 +2575,14 @@ export function FhevmInstanceSection({
   fhevmStatus,
   fhevmError,
 }: {
-  fhevmInstance: any;
+  fhevmInstance: FhevmInstance | undefined;
   fhevmStatus: string;
   fhevmError: Error | null;
 }) {
   return (
     <div className="rounded-lg bg-white border-2 border-black pb-4 px-4">
       <p className="font-semibold text-black text-lg mt-4">FHEVM instance</p>
-      {printProperty("Fhevm Instance", fhevmInstance ? "OK" : "undefined")}
+      {printProperty("Fhevm Instance", !!fhevmInstance ? "OK" : "undefined")}
       {printProperty("Fhevm Status", fhevmStatus)}
       {printProperty("Fhevm Error", fhevmError ?? "No Error")}
     </div>
@@ -2643,7 +2645,7 @@ export function TechnicalDetailsSection({
   ethersSigner: ethers.Signer | undefined;
   contractAddress: string | undefined;
   isDeployed: boolean | undefined;
-  fhevmInstance: any;
+  fhevmInstance: FhevmInstance | undefined;
   fhevmStatus: string;
   fhevmError: Error | null;
 }) {
@@ -2853,8 +2855,6 @@ export type RockPaperScissorsInfoType = {
 `hello-fhevm/packages/site/lib/constants.ts`
 
 ```typescript:hello-fhevm/packages/site/lib/constants.ts
-import { RockPaperScissorsABI } from "@/abi/RockPaperScissorsABI";
-
 /**
  * Game status constants for RockPaperScissors contract
  * These correspond to the enum values in the smart contract
