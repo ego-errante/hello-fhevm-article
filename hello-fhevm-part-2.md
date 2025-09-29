@@ -2,7 +2,7 @@
 
 In this section, we'll start writing code, starting from our confidential smart contract `RockPaperScissors.sol`. Our smart contract will handle running game logic (Rock-Paper-Scissors) on encrypted data. Users submit encrypted data and the contract computes the winner using FHE.
 
-1. **Imports and contract declaration**
+**2.1. Imports and contract declaration**
 
 We need some help from the fhevm solidity library, let's import them. At the top of the file, add:
 
@@ -27,7 +27,7 @@ These imports:
 - `euint8` and `externalEuint8` — encrypted `uint8` types used in FHEVM (more on this later). See [list of supported types](https://docs.zama.ai/protocol/solidity-guides/smart-contract/types).
 - `SepoliaConfig` — to enable FHEVM support, the contract must inherit from the abstract `SepoliaConfig` contract. Without it, the contract will not be able to execute any FHEVM-related functionality on Sepolia or Hardhat.
 
-2. **Defining the Game: State Variables, Encrypted Types and Events**
+**2.2. Defining the Game: State Variables, Encrypted Types and Events**
 
 Add these variables and types in the contract body. They will control game state:
 
@@ -87,7 +87,7 @@ We'll emit events at key points of a game's lifecycle. This allows us to update 
 - `MoveSubmitted` - when either player submits a move.
 - `GameResolved` - when a game completes.
 
-3. **Starting a game: `createGame()`**
+**2.3. Starting a game: `createGame()`**
 
 ```solidity
 ...
@@ -117,7 +117,7 @@ We'll emit events at key points of a game's lifecycle. This allows us to update 
 
 The `createGame()` function is our starting point. It handles the standard logic for initializing a game: incrementing a counter for a new `gameId`, assigning the creator as `player1`, setting the status to `Created`, setting default values for for moves and results, and emitting the `GameCreated` event.
 
-4. **Making a Private Move: `submitEncryptedMove()`**
+**2.4. Making a Private Move: `submitEncryptedMove()`**
 
 ```solidity
         _games[gameId].resolvedAt = 0;
@@ -236,7 +236,7 @@ Here is the step-by-step flow:
 
       For any encrypted variable either `encryptedMove` or `validatedMove`, if these two permissions are missing, the caller will be unable to decrypt them off-chain.
 
-**5. The Blind Refree: `_resolveGame()`**
+**2.5. The Blind Refree: `_resolveGame()`**
 
 ```solidity
 
@@ -321,7 +321,7 @@ The function executes the classic Rock-Paper-Scissors rules, but every operation
 
     > Notice that we never grant a player the permission to see the other player's move. Although a player can deduce the other player's moves based on the result, it's only because this is a simple game. A player only ever sees their move and the result. Neither the smart contract nor non-participants ever see any player moves or the result of a game.
 
-**6. State getters: `getNextGameId()` and `getGame()`**
+**2.6. State getters: `getNextGameId()` and `getGame()`**
 
 ```
 

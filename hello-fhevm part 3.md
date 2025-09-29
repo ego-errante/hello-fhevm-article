@@ -8,18 +8,16 @@ _**A Quick Note on Architecture:** The template's frontend is built with modular
 
 For this section, we'll be working in `packages/site`. Keep that in mind.
 
-**1. Add third party libraries**
+**3.1. Add third party libraries**
 
-```
-
-// in packages/site
+```bash
+# in packages/site
 npm install @tanstack/react-query react-icons
-
 ```
 
 This installs `@tanstack/react-query` for clean request management and `react-icons` to provide visual icons for our game interface.
 
-**2. Update `@packages/site/providers.tsx`**
+**3.2. Update `@packages/site/providers.tsx`**
 
 Update your `@packages/site/providers.tsx` to the below:
 
@@ -69,7 +67,7 @@ This:
 - sets up `react-query` query provider for the frontend.
 - configures the default network to ethereum sepolia with a custom rpc url. You can get the `your-infura-api-key` from the infura account get your the rpc url is a using the api you got from infura/metamask dashboard you created in in part 1.
 
-**3. The Core of Frontend Functionality `useRockPaperScissors.tsx`**
+**3.3. The Core of Frontend Functionality `useRockPaperScissors.tsx`**
 
 Now that our application is set up with providers, let's look at the heart of our game's frontend logic: the `useRockPaperScissors.tsx` hook.
 
@@ -94,7 +92,7 @@ Its key responsibilities are:
 
 By structuring our code this way, we achieve a clean separation of concerns. In the next sections, we will dive into each of the specialized hooks it uses to see exactly how we read game state, handle actions, and process results.
 
-**4. Fetching On-Chain State with `useGameState.ts`**
+**3.4. Fetching On-Chain State with `useGameState.ts`**
 
 The first specialized hook our orchestrator uses is `useGameState`. Before our app can display anything meaningful, it needs to know the current state of the game on the blockchain. Is there a game running? Is the current user one of the players? This hook is responsible for answering those questions.
 
@@ -113,7 +111,7 @@ It's important to note what this hook _doesn't_ do: it does **not** decrypt anyt
 
 See [tanstack query docs](https://tanstack.com/query/latest/docs/framework/react/overview) if you want to learn more about `useQuery` or other tanstack query features.
 
-**5. Making a Move: Encrypting and Submitting with `useGameActions.ts`**
+**3.5. Making a Move: Encrypting and Submitting with `useGameActions.ts`**
 
 Now that our application can read the game's state, we need to give players a way to interact with it. The `useGameActions` hook is responsible for all "write" operations—actions that change the state of our smart contract. This includes creating a new game and, most importantly, submitting a player's move.
 
@@ -146,7 +144,7 @@ This matches the function signature we defined in Part 2: `submitEncryptedMove(u
 
 This hook perfectly illustrates the first half of the FHEVM workflow: encrypting data on the client and sending it to a smart contract for private computation.
 
-**6. Revealing the Winner: Decrypting the Result with `useGameResults.ts`**
+**3.6. Revealing the Winner: Decrypting the Result with `useGameResults.ts`**
 
 Our players have made their moves, and the smart contract has confidentially determined the winner. But the result is still an encrypted secret on the blockchain. The `useGameResults` hook is responsible for the final, and most rewarding, step: securely revealing the outcome to the players.
 
@@ -171,11 +169,11 @@ When a user clicks "View Results," a function within this hook is triggered. It 
 
     Crucially, this `userDecrypt` call will only succeed for the two players involved in the game. This is because in our smart contract, we used only granted them permission with`FHE.allow` . This on-chain rule is enforced by the FHEVM network. If a spectator tries this decryption flow, the call will fail, protecting the privacy of the game's outcome.
 
-**7. Putting the UI together**
+**3.7. Putting the UI together**
 
 We have gone through the hooks that power the frontend of our dApp. They implement the full encryption, submission and decryption cycle. The final step is building the React components that use these hooks to create a functional user interface. We'll follow a top-down approach, starting from the application's root layout to see how everything is connected.
 
-**7.1 The Root Layout (`app/layout.tsx`)**
+**3.7.1. The Root Layout (`app/layout.tsx`)**
 
 Starting with our layout file in `packages/site/app/layout.tsx`. Copy this code:
 
@@ -185,7 +183,7 @@ Starting with our layout file in `packages/site/app/layout.tsx`. Copy this code:
 
 We made a few changes: added a new font (`Funnel_Sans`), and updated the metadata and app logo to better match our dApp.
 
-**7.2. The Home Page (`app/page.tsx`)**
+**3.7.2. The Home Page (`app/page.tsx`)**
 
 Next, we'll set up the main page of our site, `packages/site/app/page.tsx`. Copy this code
 
@@ -195,11 +193,9 @@ Next, we'll set up the main page of our site, `packages/site/app/page.tsx`. Copy
 
 We replaced the `FHECounterDemo` with our new `RockPaperScissorsDemo` component.
 
-**7.3. The Main Event: A Guided Build of `RockPaperScissorsDemo.tsx`**
+**3.7.4. Hooks and `RockPaperScissorsDemo` Overview**
 
 We will now build our primary interactive component, `RockPaperScissorsDemo`, piece by piece.
-
-**7.3.1. Hooks and `RockPaperScissorsDemo` Overview**
 
 Let's create the file `packages/site/components/RockPaperScissorsDemo.tsx` and add this code:
 
@@ -215,7 +211,7 @@ Understood. Apologies, my previous draft did not align with the structure of you
 
 Here is the improved draft.
 
-**7.3.2. Displaying Game State: `GameStatusBoxSection`**
+**3.7.5. Displaying Game State: `GameStatusBoxSection`**
 
 This component is the primary user-facing panel. It is responsible for displaying the current state of the game and presenting the player with the correct action button.
 
@@ -235,7 +231,7 @@ Create and copy code for these files that make up the component:
 
 The `GameStatusBoxSection` conditionally render the appropriate view - `Player1View`, `Player2View` or `SpectatorView` depending on the current user's role in the latest game
 
-**7.3.3. Capturing Player Input: The `MoveSelectorModal`**
+**3.7.6. Capturing Player Input: The `MoveSelectorModal`**
 
 When submitting a move or joining a game, the `RockPaperScissorsDemo` component shows the `MoveSelectorModal`. This component's allow a user to select their move - Rock, Paper, or Scissors and submit
 
@@ -245,7 +241,7 @@ When submitting a move or joining a game, the `RockPaperScissorsDemo` component 
 
 This component is the final step in the UI before triggering client-side FHEVM encryption and the submitting on-chain transaction.
 
-**7.3.4. Supporting UI Components**
+**3.7.7. Supporting UI Components**
 
 The remaining components in `RockPaperScissorsDemo` play supporting roles in the user experience.
 
@@ -274,7 +270,7 @@ Here is a breakdown of what they do component does:
 
 These components complete the application's UI. They are not directly involved in the FHEVM encryption or decryption flows, which are all handled by the hooks and orchestrated by the main `RockPaperScissorsDemo` component.
 
-**7.4. Shared Utilities: The `/lib` Directory**
+**3.7.8. Shared Utilities: The `/lib` Directory**
 
 Before we conclude, let's add the shared utilities in `packages/site/lib` directory.
 

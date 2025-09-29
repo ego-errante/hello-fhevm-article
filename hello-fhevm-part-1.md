@@ -41,99 +41,96 @@ To follow along, no prior knowledge of FHE or cryptography is required; the tuto
 
 To get started, let's setup up our dev environment.
 
-1. **Install a Node.js TLS version**
+**1.1. Install a Node.js TLS version**
 
-   - Ensure that Node.js is installed on your machine.
-   - Download and install the recommended LTS (Long-Term Support) version from the [official website](https://nodejs.org/en).
-   - Use an even-numbered version (e.g., v18.x, v20.x).
-   - To verify your installation:
+- Ensure that Node.js is installed on your machine.
+- Download and install the recommended LTS (Long-Term Support) version from the [official website](https://nodejs.org/en).
+- Use an even-numbered version (e.g., v18.x, v20.x).
+- To verify your installation:
 
-     ```
-     node -v
-     npm -v
-     ```
+  ```
+  node -v
+  npm -v
+  ```
 
-2. **Create a new GitHub repository from the FHEVM React template**
+**1.2. Create a new GitHub repository from the FHEVM React template**
 
-   - On GitHub, navigate to the main page of the [FHEVM React template](https://github.com/zama-ai/fhevm-react-template/) repository.
-   - Above the file list, click the green Use this template button.
-   - Follow the instructions to create a new repository from the FHEVM Hardhat template.
+- On GitHub, navigate to the main page of the [FHEVM React template](https://github.com/zama-ai/fhevm-react-template/) repository.
+- Above the file list, click the green Use this template button.
+- Follow the instructions to create a new repository from the FHEVM Hardhat template.
 
-   See Github doc for more info: [Creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)
+See Github doc for more info: [Creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)
 
-3. **Clone your newly created GitHub repository locally:** Now that your GitHub repository has been created, you can clone it to your local machine:
+**1.3. Clone your newly created GitHub repository locally:**
+Now that your GitHub repository has been created, you can clone it to your local machine:
 
-   ```
-   cd <your-preferred-location>
-   git clone <url-to-your-new-repo>
-   # Navigate to the root of your new FHEVM Hardhat project
+```
+cd <your-preferred-location>
+git clone <url-to-your-new-repo>
+# Navigate to the root of your new FHEVM Hardhat project
 
-   cd <your-new-repo-name>
-   ```
+cd <your-new-repo-name>
+```
 
-4. **Install Dependencies:** Before we install dependencies, let's briefly look at the structure of the project. Here's what the file tree looks like inside your local clone of the repo:
+**1.4. Install Dependencies:** Before we install dependencies, let's briefly look at the structure of the project. Here's what the file tree looks like inside your local clone of the repo:
 
-   ```
-   <your-new-repo-name>/
-   ├── LICENSE
-   ├── README.md
-   ├── package-lock.json
-   ├── package.json
-   ├── packages/
-   │   ├── fhevm-hardhat-template/
-   │   ├── fhevm-react/
-   │   ├── postdeploy/
-   │   └── site/
-   ```
+```
+<your-new-repo-name>/
+├── LICENSE
+├── README.md
+├── package-lock.json
+├── package.json
+├── packages/
+│   ├── fhevm-hardhat-template/
+│   ├── fhevm-react/
+│   ├── postdeploy/
+│   └── site/
+```
 
-   We will focus on `packages/fhevm-hardhat-template` for our Hardhat project concerned with writing and deploying our smart contract and `packages/site` for building our interactive frontend with Next.js. To install dependencies for both, we do the following:
+We will focus on `packages/fhevm-hardhat-template` for our Hardhat project concerned with writing and deploying our smart contract and `packages/site` for building our interactive frontend with Next.js. To install dependencies for both, run:
 
-   ```bash
-   # For the smart contract
-   cd packages/fhevm-hardhat-template
-   npm install
+```bash
+# in the repo root
+npm install
+```
 
-   # For the frontend
-   cd ../site
-   npm install
-   ```
+**1.5. Set up the Hardhat configuration variables**
 
-5. **Set up the Hardhat configuration variables**
+We will be deploying the smart contract to the Sepolia Ethereum Testnet.
 
-   We will be deploying the smart contract to the Sepolia Ethereum Testnet.
+**1.5.1. MNEMONIC**
 
-   **MNEMONIC**
+A mnemonic is a 12-word seed phrase used to generate your Ethereum wallet keys.
 
-   A mnemonic is a 12-word seed phrase used to generate your Ethereum wallet keys.
+Get one by creating a wallet with MetaMask, or using any trusted mnemonic generator.
 
-   Get one by creating a wallet with MetaMask, or using any trusted mnemonic generator.
+Set it up in your Hardhat project - `packages/fhevm-hardhat-template`:
 
-   Set it up in your Hardhat project - `packages/fhevm-hardhat-template`:
+```bash
+npx hardhat vars set MNEMONIC
+```
 
-   ```bash
-   npx hardhat vars set MNEMONIC
-   ```
+**1.5.2. INFURA_API_KEY**
 
-   **INFURA_API_KEY**
+The INFURA project key allows you to connect to Ethereum testnets like Sepolia.
 
-   The INFURA project key allows you to connect to Ethereum testnets like Sepolia.
+Obtain one by following the [Infura + MetaMask](https://docs.metamask.io/services/get-started/infura/) setup guide.
 
-   Obtain one by following the [Infura + MetaMask](https://docs.metamask.io/services/get-started/infura/) setup guide.
+Configure it in your project:
 
-   Configure it in your project:
+```bash
+npx hardhat vars set INFURA_API_KEY
+```
 
-   ```bash
-   npx hardhat vars set INFURA_API_KEY
-   ```
+**1.5.3. Default Values**
 
-   **Default Values**
+If you skip this step, Hardhat will fall back to these defaults:
 
-   If you skip this step, Hardhat will fall back to these defaults:
+- MNEMONIC = "test test test test test test test test test test test junk"
+- INFURA_API_KEY = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 
-   - MNEMONIC = "test test test test test test test test test test test junk"
-   - INFURA_API_KEY = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+**1.6. Get Testnet Funds:** You can get Sepolia testnet funds from different providers for free. Here are some faucets:
 
-6. **Get Testnet Funds:** You can get Sepolia testnet funds from different providers for free. Here are some faucets:
-   - https://faucets.chain.link/sepolia
-   - https://www.alchemy.com/faucets/ethereum-sepolia
-   - https://cloud.google.com/application/web3/faucet/ethereum/sepolia
+- https://faucets.chain.link/sepolia
+- https://www.alchemy.com/faucets/ethereum-sepolia
+- https://cloud.google.com/application/web3/faucet/ethereum/sepolia
