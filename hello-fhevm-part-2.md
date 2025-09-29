@@ -119,12 +119,12 @@ The `createGame()` function is our starting point. It handles the standard logic
 
 **2.4. Making a Private Move: `submitEncryptedMove()`**
 
+Now let's add the the `submitEncryptedMove` function.
+
+This function records a player's encrypted move and processes it without ever knowing what it is.
+
 ```solidity
-        _games[gameId].resolvedAt = 0;
-
-        emit GameCreated(gameId, msg.sender);
     }
-
 
     /// @notice Submits an encrypted move for a game
     /// @param gameId The game identifier
@@ -134,10 +134,6 @@ The `createGame()` function is our starting point. It handles the standard logic
         Game storage game = _games[gameId];
         require(game.player1 != address(0), "Game does not exist");
         require(game.status != GameStatus.Resolved, "Game is already resolved");
-
-        if (msg.sender != game.player1) {
-            require(game.status == GameStatus.Player1MoveSubmitted, "Player1 must submit their move first");
-        }
 
         euint8 move = FHE.fromExternal(encryptedMove, inputProof);
 
@@ -172,161 +168,189 @@ The `createGame()` function is our starting point. It handles the standard logic
 }
 ```
 
-Users submit their moves using the `submitEncryptedMoves` function. Let's go through it step by step:
+Let's break this down step by step:
 
-**Parameters**
+```solidity
+function submitEncryptedMove(uint256 gameId, externalEuint8 encryptedMove, bytes calldata inputProof) external {
+```
 
-- `gameId` - the game the move is being submitted for.
-- `encryptedMove` - moves are represented using integer values (0=rock, 1=paper, 2=scissors) but the frontend submits those values using the `externalEuint8` type. `externalEuint8` is an encrypted integer produced off-chain by the function caller (player) and sent to the smart contract.
-- `inputProof` - when using `externalEuint8` in a smart contract, we must include this additional argument to ensure the validity of this encrypted value (`encryptedMove`), it is a bytes array containing a Zero-Knowledge Proof of Knowledge (ZKPoK) that proves two things:
+The key input parameters for the function are: `encryptedMove`, which is the player's move encrypted on the frontend, it is the `externalEuint8` type - an encrypted integer produced off-chain by the function caller (player), and `inputProof` which is an additional argument to ensure the validity of the external encrypted value (`encryptedMove`).
 
-  1. The `externalEuint8` was encrypted off-chain by the function caller (msg.sender).
-  2. The `externalEuint8` is bound to the contract (`address(this)`) and can only be processed by it.
+These two checks are critical to maintaining the integrity and security of external encrypted data used in the FHEVM, preventing malicious actors from submitting invalid or tampered encrypted values. Conveniently, the `@fhevm/react` library generates this for us on the client-side.
 
-  These two checks are critical to maintaining the integrity and security of external encrypted data used in the FHEVM, preventing malicious actors from submitting invalid or tampered encrypted values. Conveniently, the `@fhevm/react` library generates this for us on the client-side.
+Inside the function, after running checks we do some FHE specific actions:
 
-**Logic flow**
+```solidity
+euint8 move = FHE.fromExternal(encryptedMove, inputProof);
+```
 
-The function's core logic acts as a state machine, routing a player's move based on the current status of the game. It uses a sequence of `require` statements and an `if/else` block to manage the game's lifecycle.
+This line verifies the zero-knowledge proof and returns a usable encrypted value within the contract. This makes the `externalEuint8` usable in the smart contract.
 
-Here is the step-by-step flow:
+```solidity
+euint8 validatedMove = FHE.rem(move, 3);
+```
 
-1.  **State Validation:** First, a series of `require` checks ensure the integrity of the game. It confirms the `gameId` is valid, the game hasn't already been resolved, and that the player making the move is authorized to do so at the current stage.
+Instead of the usual solidity check like `require(move < 3)` which is impossible in FHEVM (result of comparisons are encrypted values), we make sure input is valid by sanitizing the input using the remainder operation.
 
-2.  **Move Validation:** Next, move is loaded into the contract and validated.
+```solidity
+if (msg.sender == game.player1) {
+    // Player 1 is submitting their move
+    require(game.status == GameStatus.Created, "Player1 can only submit in Created state");
 
-    - You cannot directly use `externalEuint8` in FHE operations. To manipulate it with the FHEVM library, you first need to convert it into the native FHE type `euint8`.
-      This conversion is done using:
+    game.move1 = validatedMove;
+    game.status = GameStatus.Player1MoveSubmitted;
+} else {
+    // This is player 2 joining and submitting their move
+    require(game.status == GameStatus.Player1MoveSubmitted, "Player1 must submit their move first");
 
-      ```solidity
-      euint8 move = FHE.fromExternal(encryptedMove, inputProof);
-      ```
+    game.player2 = msg.sender;
+    game.move2 = validatedMove;
 
-      This method verifies the zero-knowledge proof and returns a usable encrypted value within the contract.
+    // When player 2 submits their move, we can immediately resolve the game.
+    _resolveGame(gameId, game);
+}
+```
 
-    - Next, we need to ensure the player's move is valid (i.e., 0 for Rock, 1 for Paper, or 2 for Scissors). In standard Solidity, you might use a `require` statement like `require(move < 3, "Invalid move")`. However, with FHE, we cannot perform conditional checks like `if` or `require` on encrypted values. The result of a comparison like `FHE.lt(move, 3)` is an _encrypted boolean_ (`ebool`), not a clear `true` or `false` that the contract can use to branch or revert.
+After validation, the contract records the player's move, updates game state, and resolves the game if necessary.
 
-      Instead, for this use case, we can use a simple and efficient FHE pattern to sanitize the input. By using the FHE remainder operator, we guarantee that any input value is mapped to the valid range `[0, 2]`:
+Finally, before emitting our event we must handle permissions for the encrypted move. We do that using two function calls that work together:
 
-      ```solidity
-      // Validate and normalize move to range (0, 1, 2) using modulo 3 operation in FHE
-      // For any input, this will map it to 0, 1, or 2
-      euint8 validatedMove = FHE.rem(move, 3);
-      ```
+```solidity
+FHE.allowThis(validatedMove);
+FHE.allow(validatedMove, msg.sender);
+```
 
-      This single operation elegantly handles validation without branching or revealing any information about the move itself.
+Let's explain the importance of these calls:
 
-3.  **Move Routing and State Update**: After validation, the contract routes the move and updates game state accordingly:
-
-    - **If `msg.sender` is `player1`** - it verifies that the player hasn't submitted a move by testing for `Created` status, records their move and updates game status.
-    - **If `msg.sender` is `player2`** - it verifies that `player1` has submitted their move already by testing for `Player1MoveSubmitted` status, sets `player2` address for the game and records their move. Finally it resolves the game and determines the result with `_resolveGame`.
-    - For both `player1` and `player2`, we emit the `MoveSubmitted` event and do some FHE things before ending the function call. Let's explain what's happening there:
-
-      ```solidity
-      // Allow the contract to use this move in future computations
-      // Only allow the submitting player to decrypt their own move
-      FHE.allowThis(validatedMove);
-      FHE.allow(validatedMove, msg.sender);
-      ```
-
-      Both of these function calls are _required_ to ensure the game works correctly. They allow future smart contract computation on `validatedMove` and enable the caller to decrypt their move off-chain.
-
-      - `FHE.allowThis(validatedMove)` - grants the `RockPaperScissors` contract permission to use `validatedMove` in future transactions.
-      - `FHE.allow(validatedMove, msg.sender)` - grants `msg.sender` permission to use `validatedMove`.
-
-      For any encrypted variable either `encryptedMove` or `validatedMove`, if these two permissions are missing, the caller will be unable to decrypt them off-chain.
+- `FHE.allowThis()` - grants permission to the smart contract to use this value in future transactions, this is critical for the next step in our game. Without it, the confidential comparison of player moves in `_resolveGame()` will fail.
+- `FHE.allow()` - grants permission to the player who submitted a move to decrypt it. For the decryption to work, it also depends on the first permission to have been granted.
 
 **2.5. The Blind Refree: `_resolveGame()`**
 
+Let's build the `_resolveGame()` function:
+
 ```solidity
-
 ...
-emit MoveSubmitted(gameId, msg.sender);
+        emit MoveSubmitted(gameId, msg.sender);
+    }
+
+    /// @notice Internal function to resolve the game and compute the encrypted result
+    /// @param gameId The game identifier
+    /// @param game The game storage reference
+    function _resolveGame(uint256 gameId, Game storage game) internal {
+        // function body
+    }
 }
-
-   /// @notice Internal function to resolve the game and compute the encrypted result
-   /// @param gameId The game identifier
-   /// @param game The game storage reference
-   function _resolveGame(uint256 gameId, Game storage game) internal {
-       // Compute the winner using FHE operations without exposing individual moves
-       // Rock=0, Paper=1, Scissors=2
-       // Rock beats Scissors, Paper beats Rock, Scissors beats Paper
-
-       // Create constants for comparison
-       euint8 zero = FHE.asEuint8(0);
-       euint8 one = FHE.asEuint8(1);
-       euint8 two = FHE.asEuint8(2);
-
-       // Check for draw (move1 == move2)
-       ebool isDraw = FHE.eq(game.move1, game.move2);
-
-       // Check all winning conditions for player1:
-       // Player1 wins if: (move1=0 && move2=2) || (move1=1 && move2=0) || (move1=2 && move2=1)
-
-       // Player1 plays Rock (0) and Player2 plays Scissors (2)
-       ebool p1RockVsP2Scissors = FHE.and(FHE.eq(game.move1, zero), FHE.eq(game.move2, two));
-
-       // Player1 plays Paper (1) and Player2 plays Rock (0)
-       ebool p1PaperVsP2Rock = FHE.and(FHE.eq(game.move1, one), FHE.eq(game.move2, zero));
-
-       // Player1 plays Scissors (2) and Player2 plays Paper (1)
-       ebool p1ScissorsVsP2Paper = FHE.and(FHE.eq(game.move1, two), FHE.eq(game.move2, one));
-
-       // Player1 wins if any of the above conditions are true
-       ebool player1Wins = FHE.or(FHE.or(p1RockVsP2Scissors, p1PaperVsP2Rock), p1ScissorsVsP2Paper);
-
-       // Compute the final result:
-       // If draw: result = 0
-       // If player1 wins: result = 1
-       // If player2 wins: result = 2
-
-       // First, determine if it's a draw (0) or not
-       euint8 resultIfNotDraw = FHE.select(player1Wins, one, two);
-       game.result = FHE.select(isDraw, zero, resultIfNotDraw);
-
-       // Grant both players access to decrypt ONLY the result, not individual moves
-       FHE.allowThis(game.result);
-   FHE.allow(game.result, game.player1);
-   FHE.allow(game.result, game.player2);
-
-       game.status = GameStatus.Resolved;
-       game.resolvedAt = block.timestamp;
-
-       emit GameResolved(gameId);
-   }
-
-}
-
 ```
 
-This private function is where the result of the game is determined. It is called internally by `submitEncryptedMove` when player2 submits their move and resolved in that same transaction. It acts as "blind refree", it computes the reult of the game without knowing what the result is or who played what. Let's explore how it does this:
+The `_resolveGame()` private function is where the result of the game is determined. It acts as "blind refree", computing the result of the game without knowing the moves or result.
 
-**Logic flow**
+The function determines the winner by testing for different outcomes before putting them together to create the value for the final result.
 
-The function executes the classic Rock-Paper-Scissors rules, but every operation is performed on _encrypted_ data.
+```solidity
+...
+    /// @notice Internal function to resolve the game and compute the encrypted result
+    /// @param gameId The game identifier
+    /// @param game The game storage reference
+    function _resolveGame(uint256 gameId, Game storage game) internal {
+        // Compute the winner using FHE operations without exposing individual moves
+        // Rock=0, Paper=1, Scissors=2
+        // Rock beats Scissors, Paper beats Rock, Scissors beats Paper
 
-1.  **Checking for a Draw**: The first step is to determine if the game is a draw. In standard Solidity, you'd write `game.move1 == game.move2`. The FHEVM equivalent is `FHE.eq(game.move1, game.move2)`. This function takes two encrypted values as input and returns an `ebool` (an encrypted boolean) which is `true` if they are equal and `false` otherwise. The contract itself cannot see this result, but it can use the `ebool` in subsequent FHE operations.
+        // Create constants for comparison
+        euint8 zero = FHE.asEuint8(0);
+        euint8 one = FHE.asEuint8(1);
+        euint8 two = FHE.asEuint8(2);
 
-2.  **Determining the Winner**: Next, we evaluate the win conditions for Player 1. The logic is: Player 1 wins if they play Rock (0) and Player 2 plays Scissors (2), OR Paper (1) vs. Rock (0), OR Scissors (2) vs. Paper (1).
+        // Check for draw (move1 == move2)
+        ebool isDraw = FHE.eq(game.move1, game.move2);
 
-    - We build each individual condition using `FHE.and` and `FHE.eq`. For example, `FHE.and(FHE.eq(game.move1, 0), FHE.eq(game.move2, 2))` checks if Player 1 played Rock and Player 2 played Scissors.
-    - We then combine these three winning conditions using `FHE.or`. The final `player1Wins` is an `ebool` that is `true` if any of the winning conditions are met.
+        // Check all winning conditions for player1:
+        // Player1 wins if: (move1=0 && move2=2) || (move1=1 && move2=0) || (move1=2 && move2=1)
 
-3.  **Selecting the Result**: Now that we have encrypted booleans representing `isDraw` and `player1Wins`, we can determine the final result. For this, we use `FHE.select`. This is the FHEVM equivalent of a ternary operator (`condition ? value_if_true : value_if_false`).
+        // Player1 plays Rock (0) and Player2 plays Scissors (2)
+        ebool p1RockVsP2Scissors = FHE.and(FHE.eq(game.move1, zero), FHE.eq(game.move2, two));
 
-    - First, we decide the outcome if it's _not_ a draw: `euint8 resultIfNotDraw = FHE.select(player1Wins, 1, 2)`. This line says, "If `player1Wins` is true, the result is 1; otherwise, the result is 2 (meaning Player 2 wins)."
-    - Then, we determine the final result by accounting for the draw condition: `game.result = FHE.select(isDraw, 0, resultIfNotDraw)`. This says, "If `isDraw` is true, the final result is 0; otherwise, use the `resultIfNotDraw` we just calculated."
+        // Player1 plays Paper (1) and Player2 plays Rock (0)
+        ebool p1PaperVsP2Rock = FHE.and(FHE.eq(game.move1, one), FHE.eq(game.move2, zero));
 
-4.  **Granting Decryption Permission**: At the end, the game is resolved and both players are granted permission to view `game.result`.
+        // Player1 plays Scissors (2) and Player2 plays Paper (1)
+        ebool p1ScissorsVsP2Paper = FHE.and(FHE.eq(game.move1, two), FHE.eq(game.move2, one));
 
-    > Notice that we never grant a player the permission to see the other player's move. Although a player can deduce the other player's moves based on the result, it's only because this is a simple game. A player only ever sees their move and the result. Neither the smart contract nor non-participants ever see any player moves or the result of a game.
+        // Player1 wins if any of the above conditions are true
+        ebool player1Wins = FHE.or(FHE.or(p1RockVsP2Scissors, p1PaperVsP2Rock), p1ScissorsVsP2Paper);
+
+        // Compute the final result:
+        // If draw: result = 0
+        // If player1 wins: result = 1
+        // If player2 wins: result = 2
+
+        // First, determine if it's a draw (0) or not
+        euint8 resultIfNotDraw = FHE.select(player1Wins, one, two);
+        game.result = FHE.select(isDraw, zero, resultIfNotDraw);
+
+        // Grant both players access to decrypt ONLY the result, not individual moves
+        FHE.allowThis(game.result);
+        FHE.allow(game.result, game.player1);
+        FHE.allow(game.result, game.player2);
+
+        game.status = GameStatus.Resolved;
+        game.resolvedAt = block.timestamp;
+
+        emit GameResolved(gameId);
+    }
+}
+```
+
+We check for a draw using `FHE.eq` (FHEVM version of equality check) and get back an encrypted boolean which privately holds that result.
+
+```solidity
+ebool isDraw = FHE.eq(game.move1, game.move2);
+```
+
+Next we test for the different win conditions for Player 1 and combine them using other FHEVM comparison operators `FHE.and` and `FHE.or`.
+
+```solidity
+// Player1 plays Rock (0) and Player2 plays Scissors (2)
+ebool p1RockVsP2Scissors = FHE.and(FHE.eq(game.move1, zero), FHE.eq(game.move2, two));
+
+// Player1 plays Paper (1) and Player2 plays Rock (0)
+ebool p1PaperVsP2Rock = FHE.and(FHE.eq(game.move1, one), FHE.eq(game.move2, zero));
+
+// Player1 plays Scissors (2) and Player2 plays Paper (1)
+ebool p1ScissorsVsP2Paper = FHE.and(FHE.eq(game.move1, two), FHE.eq(game.move2, one));
+
+// Player1 wins if any of the above conditions are true
+ebool player1Wins = FHE.or(FHE.or(p1RockVsP2Scissors, p1PaperVsP2Rock), p1ScissorsVsP2Paper);
+```
+
+With booleans representing draw and Player 1 win conditions in hand, we determine the final result using the `FHE.select` ternary operator, result is `zero` if it `isDraw` is true or `resultIfNotDraw` otherwise.
+
+```solidity
+// First, determine if it's a draw (0) or not
+euint8 resultIfNotDraw = FHE.select(player1Wins, one, two);
+game.result = FHE.select(isDraw, zero, resultIfNotDraw);
+```
+
+At the end, both players are given permission to view the `game.result`.
+
+```solidity
+// Grant both players access to decrypt ONLY the result, not individual moves
+FHE.allowThis(game.result);
+FHE.allow(game.result, game.player1);
+FHE.allow(game.result, game.player2);
+```
+
+Notice that a player only ever "sees" their move and the result. Although a player can deduce the other player's moves based on the result, it's only because this is a simple game. The game runs to completion, without either the smart contract nor non-participants ever seeing player moves or the result of a game.
 
 **2.6. State getters: `getNextGameId()` and `getGame()`**
 
-```
+We expose public getter functions - `getGame()` to fetch game state for a specific game and `getNextGameId()` to fetch the current value of `_nextGameId`.
 
+```
 ...
-event GameResolved(uint256 indexed gameId);
+        emit GameResolved(gameId);
+    }
 
     /// @notice Get the next game ID (public getter for latest game ID = nextGameId - 1)
     /// @return The next game ID to be assigned
@@ -375,15 +399,14 @@ event GameResolved(uint256 indexed gameId);
             game.resolvedAt
         );
     }
-
-    /// @notice Creates a new game
-    /// @return gameId The unique identifier for the new game
-    function createGame() external returns (uint256 gameId) {
-
-...
-
+}
 ```
 
-We expose public getter functions - `getGame()` to fetch game state for a specific game and `getNextGameId()` to fetch the current value of `_nextGameId`, letting the frontend get the most recent game easily.
+This completes our confidential contract for the game. But a contract is only half the story, users need an interface to play.
 
-This completes our confidential contract for the game - players submit their moves privately, our smart contract computes the result confidentially and exposes it securely.
+This leaves us with some key challenges as we move to the next section. Challenges such as:
+
+- how are `externalEuint8` and `inputProof` are created in the browser?
+- how do we decrypt the encrypted game result?
+
+In the next section, we'll answer these questions as we build our React frontend.

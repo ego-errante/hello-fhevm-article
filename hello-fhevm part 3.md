@@ -65,7 +65,7 @@ export function Providers({ children }: Props) {
 This:
 
 - sets up `react-query` query provider for the frontend.
-- configures the default network to ethereum sepolia with a custom rpc url. You can get the `your-infura-api-key` from the infura account get your the rpc url is a using the api you got from infura/metamask dashboard you created in in part 1.
+- configures the default network to ethereum sepolia with a custom rpc url. Replace `<your-infura-api-key>` with the metamask api key you got in part 1.
 
 **3.3. The Core of Frontend Functionality `useRockPaperScissors.tsx`**
 
@@ -134,7 +134,7 @@ The `createGameMutation` is a standard blockchain transaction that calls the `cr
 
     `createEncryptedInput()` creates an encrypted value bound to both the contract and user addresses. This ensures only the signer can use this encrypted value within the specific contract, preventing reuse/misuse by other users or contracts.
 
-    `add8` defines the type to be converted to as `externalEuint8`.
+    `add8` tells the FHEVM instance that we are encrypting `move` to the `externalEuint8` solidity type.
 
     This code snippet line takes the plaintext number `1` and transforms it into a secure ciphertext. The user's actual move never leaves their machine unencrypted.
 
