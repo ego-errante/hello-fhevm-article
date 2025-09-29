@@ -1,5 +1,7 @@
 # Building Your First Confidential DApp: A "Hello FHEVM" Tutorial with Rock-Paper-Scissors
 
+![hello fhevm message](./hello-fhevm.svg)
+
 ## Introduction
 
 What if you could build dApps where user data remains private? Multiple users can submit data, smart contracts can compute on that data, all while that data remains hidden from other users and even the smart contract itself. That might sound like magic but that's exactly what Zama's FHEVM enables.
@@ -19,6 +21,8 @@ Did you get that? If you didn't, it's alright. Let's break that down:
 ### What We'll Build
 
 To demonstrate the the power of FHE and the ease of FHEVM, we're going to build a Rock-Paper-Scissors dApp. It's a [classic game](https://en.wikipedia.org/wiki/Rock_paper_scissors), but here's the twist - with the power of FHE, users will submit encrypted moves, the contract determines the winner without ever knowing the moves or the result. Only the players can see the result.
+
+For those curious about the end result, here is a [link to the completed Github repo](https://github.com/ego-errante/hello-fhevm) and here's a [link to the deployed dApp](https://hello-fhevm.netlify.app/).
 
 ### Learning Objectives
 
@@ -2935,17 +2939,21 @@ Start the frontend:
 npm run dev:mock
 ```
 
-**4.4. Game play**
+**4.4. Some App Screenshots**
 
-In the video below, I use two different browsers to show a game between two imaginary players A and B. Player A (left screen) plays Paper, player B (right screen) plays rock resolving the game. At the end, player B wins.
+**Before connection**
 
-<video controls width="100%">
-  <source src="https://drive.google.com/uc?export=view&id=19998OthGIF1otEirLc15MAxbN7VJaVap" type="video/mp4">
-  Game play demonstration
-</video>
+![App before connection](./rock-paper-scissors-gameplay-no-connection-view.png)
 
-![Game play demonstration](https://drive.google.com/uc?export=view&
-id=19998OthGIF1otEirLc15MAxbN7VJaVap)
+**Wallet is connected and viewing result of a concluded game**
+
+![Wallet is connected and viewing result of a concluded game](./rock-paper-scissors-gameplay-result-view.png)
+
+**4.5. Game play**
+
+In the gif below, I use two browsers instances to show a game between two imaginary players A and B. Player A (left screen) plays Paper, player B (right screen) plays rock resolving the game. At the end, player B wins.
+
+![Game play demonstration](./rock-paper-scissors-demo-2-3x.gif)
 
 ## Conclusion
 
@@ -2953,22 +2961,24 @@ At this point, you have set up an environment for developing fullstack FHEVM dAp
 
 Congratulations on building your first FHEVM dApp! Trying extending this with new features like betting, adding time limits, or writing your own FHEVM-powered dApp.
 
-Here is a [link to the completed Github repo](https://github.com/ego-errante/hello-fhevm).
+Again, here's a [link to the completed Github repo](https://github.com/ego-errante/hello-fhevm) and here's a [link to the deployed dApp](https://hello-fhevm.netlify.app/).
 
 To read up on Zama FHEVM tech or other technologies used in this application, check the references section below
 
 ## References
 
-1. [Zama FHEVM Whitepaper](https://github.com/zama-ai/fhevm/blob/main/fhevm-whitepaper.pdf)
-2. [Zama Protocol Litepaper](https://docs.zama.ai/protocol/zama-protocol-litepaper#technical-details)
-3. [Zama Solidity Guides](https://docs.zama.ai/protocol/solidity-guides/)
-4. [Zama Solidity Types Guide](https://docs.zama.ai/protocol/solidity-guides/smart-contract/types)
-5. [Rock-paper-scissors - Wikipedia](https://en.wikipedia.org/wiki/Rock_paper_scissors)
-6. [Node.js Official Website](https://nodejs.org/en)
-7. [FHEVM React Template Repository](https://github.com/zama-ai/fhevm-react-template/)
-8. [Creating a Repository from a Template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)
-9. [MetaMask + Infura Setup Guide](https://docs.metamask.io/services/get-started/infura/)
-10. [Chainlink Sepolia Faucet](https://faucets.chain.link/sepolia)
-11. [Alchemy Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia)
-12. [Google Cloud Ethereum Sepolia Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
-13. [TanStack Query Documentation](https://tanstack.com/query/latest/docs/framework/react/overview)
+1. [Completed Hello FHEVM GitHub Repository](https://github.com/ego-errante/hello-fhevm)
+2. [Deployed Hello FHEVM Dapp](https://hello-fhevm.netlify.app/)
+3. [Zama FHEVM Whitepaper](https://github.com/zama-ai/fhevm/blob/main/fhevm-whitepaper.pdf)
+4. [Zama Protocol Litepaper](https://docs.zama.ai/protocol/zama-protocol-litepaper#technical-details)
+5. [Zama Solidity Guides](https://docs.zama.ai/protocol/solidity-guides/)
+6. [Zama Solidity Types Guide](https://docs.zama.ai/protocol/solidity-guides/smart-contract/types)
+7. [Rock-paper-scissors - Wikipedia](https://en.wikipedia.org/wiki/Rock_paper_scissors)
+8. [Node.js Official Website](https://nodejs.org/en)
+9. [FHEVM React Template Repository](https://github.com/zama-ai/fhevm-react-template/)
+10. [Creating a Repository from a Template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)
+11. [MetaMask + Infura Setup Guide](https://docs.metamask.io/services/get-started/infura/)
+12. [Chainlink Sepolia Faucet](https://faucets.chain.link/sepolia)
+13. [Alchemy Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia)
+14. [Google Cloud Ethereum Sepolia Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
+15. [TanStack Query Documentation](https://tanstack.com/query/latest/docs/framework/react/overview)
