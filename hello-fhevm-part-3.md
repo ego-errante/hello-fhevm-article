@@ -173,7 +173,9 @@ When a user clicks "View Results," a function within this hook is triggered. It 
 
 We have gone through the hooks that power the frontend of our dApp. They implement the full encryption, submission and decryption cycle. The final step is building the React components that use these hooks to create a functional user interface. We'll follow a top-down approach, starting from the application's root layout to see how everything is connected.
 
-**3.7.1. The Root Layout (`app/layout.tsx`)**
+**3.7.1. Setting Up The Entry Points: Layout and Page Setup**
+
+First we need to prepare the entry points to our UI components. These are mainly boilerplate code changes:
 
 Starting with our layout file in `packages/site/app/layout.tsx`. Copy this code:
 
@@ -183,8 +185,6 @@ Starting with our layout file in `packages/site/app/layout.tsx`. Copy this code:
 
 We made a few changes: added a new font (`Funnel_Sans`), and updated the metadata and app logo to better match our dApp.
 
-**3.7.2. The Home Page (`app/page.tsx`)**
-
 Next, we'll set up the main page of our site, `packages/site/app/page.tsx`. Copy this code
 
 ```typescript:hello-fhevm-client/packages/site/app/page.tsx
@@ -193,9 +193,9 @@ Next, we'll set up the main page of our site, `packages/site/app/page.tsx`. Copy
 
 We replaced the `FHECounterDemo` with our new `RockPaperScissorsDemo` component.
 
-**3.7.4. Hooks and `RockPaperScissorsDemo` Overview**
+**3.7.2. Main Orchestrator: `RockPaperScissorsDemo`**
 
-We will now build our primary interactive component, `RockPaperScissorsDemo`, piece by piece.
+We will now build our primary interactive component, `RockPaperScissorsDemo`, it doesn't render UI directly but it initializes our hooks and passes state and functions down to the presentational components.
 
 Let's create the file `packages/site/components/RockPaperScissorsDemo.tsx` and add this code:
 
@@ -205,11 +205,48 @@ Let's create the file `packages/site/components/RockPaperScissorsDemo.tsx` and a
 
 Inside our component, we first call `useMetaMaskEthersSigner()` to provide wallet functionality, `useInMemoryStorage` to get `fhevmDecryptionSignatureStorage` instance, `useFhevm()` to intialize the FHEVM library, providing the FHEVM instance object we'll use for all client-side FHE cryptography. We then pass all of this information into our main orchestrator hook, `useRockPaperScissors`.
 
+```typescript
+...
+export const RockPaperScissorsDemo = () => {
+  const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
+  const {
+    provider,
+    chainId,
+    accounts,
+    isConnected,
+    connect,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+  } = useMetaMaskEthersSigner();
+
+  const {
+    instance: fhevmInstance,
+    status: fhevmStatus,
+    error: fhevmError,
+  } = useFhevm({
+    provider,
+    chainId,
+    initialMockChains: [],
+    enabled: true,
+  });
+
+  const rockPaperScissors = useRockPaperScissors({
+    instance: fhevmInstance,
+    fhevmDecryptionSignatureStorage,
+    eip1193Provider: provider,
+    chainId,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+    userAddress: accounts?.[0] as `0x${string}` | undefined,
+  });
+...
+```
+
 With all this setup, our component now has access to everything it needs to display game state, handle user actions, and show results.
-
-Understood. Apologies, my previous draft did not align with the structure of your article. Let's correct that by continuing from where you left off, exploring the presentational components one by one as requested.
-
-Here is the improved draft.
 
 **3.7.5. Displaying Game State: `GameStatusBoxSection`**
 
