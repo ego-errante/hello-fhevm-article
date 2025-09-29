@@ -2955,6 +2955,9 @@ In the gif below, I use two browsers instances to show a game between two imagin
 
 ![Game play demonstration](./rock-paper-scissors-demo-2-3x.gif)
 
+https://github.com/user-attachments/assets/d1105828-9159-4b9b-9a51-81e16af41a70
+
+
 ## Conclusion
 
 At this point, you have set up an environment for developing fullstack FHEVM dApps, written and deployed a confidential smart contract, and built a custom frontend to interact with it using client-side encryption/decryption.
