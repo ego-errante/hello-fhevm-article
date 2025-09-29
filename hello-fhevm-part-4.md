@@ -56,13 +56,7 @@ npm run deploy:sepolia
 
 **4.3. Launch the Frontend**
 
-The `fhevm-react-template` is setup to test for a local running hardhat node. Even though we deployed on Sepolia, let's start that first. Run:
-
-```
-npm run hardhat-node
-```
-
-After giving it some seconds to come up, start the frontend:
+Start the frontend:
 
 ```
 npm run dev:mock
@@ -70,8 +64,12 @@ npm run dev:mock
 
 **4.4. Game play**
 
-In the gif below, I use two different browsers to show a game between two imaginary players A and B. Player A (left screen) plays Paper, player B (right screen) plays rock resolving the game. At the end, player B wins.
+In the video below, I use two different browsers to show a game between two imaginary players A and B. Player A (left screen) plays Paper, player B (right screen) plays rock resolving the game. At the end, player B wins.
 
-```gameplay video
+<video controls width="100%">
+  <source src="https://drive.google.com/uc?export=view&id=19998OthGIF1otEirLc15MAxbN7VJaVap" type="video/mp4">
+  Game play demonstration
+</video>
 
-```
+![Game play demonstration](https://drive.google.com/uc?export=view&
+id=19998OthGIF1otEirLc15MAxbN7VJaVap)

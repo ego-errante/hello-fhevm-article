@@ -89,7 +89,26 @@ hello-fhevm/
 │   └── site/
 ```
 
-We will focus on `packages/fhevm-hardhat-template` for our Hardhat project concerned with writing and deploying our smart contract and `packages/site` for building our interactive frontend with Next.js. To install dependencies for both, run:
+We will focus on `hello-fhevm/packages/fhevm-hardhat-template` for our Hardhat project concerned with writing and deploying our smart contract and `hello-fhevm/packages/site` for building our interactive frontend with Next.js.
+Before installing, we'll update the package.json files to remove scripts that are only needed for local Hardhat development.
+
+Remove this `postinstall` script line in `hello-fhevm/package.json`:
+
+```json
+...
+    "postinstall": "./scripts/deploy-hardhat-node.sh",
+...
+```
+
+In `hello-fhevm/packages/site/package.json`, update the `dev:mock` command by removing the `npm run is-hardhat-node-running` test, leaving just:
+
+```json
+...
+    "dev:mock": "next dev --turbopack",
+...
+```
+
+To install dependencies for both, run:
 
 ```bash
 # in the repo root
@@ -106,7 +125,7 @@ A mnemonic is a 12-word seed phrase used to generate your Ethereum wallet keys.
 
 Get one by creating a wallet with MetaMask, or using any trusted mnemonic generator.
 
-Set it up in your Hardhat project - `packages/fhevm-hardhat-template`:
+Set it up in your Hardhat project - `hello-fhevm/packages/fhevm-hardhat-template`:
 
 ```bash
 npx hardhat vars set MNEMONIC
