@@ -57,7 +57,9 @@ To get started, let's setup up our dev environment.
 
 - On GitHub, navigate to the main page of the [FHEVM React template](https://github.com/zama-ai/fhevm-react-template/) repository.
 - Above the file list, click the green Use this template button.
-- Follow the instructions to create a new repository from the FHEVM Hardhat template.
+- Follow the instructions to create a new repository from the FHEVM Hardhat template. You can name it anything you like (e.g., "my-fhevm-dapp", "rock-paper-scissors-fhe", etc.).
+
+**Note:** For this tutorial, we'll assume you named your repository `hello-fhevm`. If you chose a different name, simply substitute `hello-fhevm` with your chosen repository name throughout this tutorial.
 
 See Github doc for more info: [Creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)
 
@@ -69,13 +71,13 @@ cd <your-preferred-location>
 git clone <url-to-your-new-repo>
 # Navigate to the root of your new FHEVM Hardhat project
 
-cd <your-new-repo-name>
+cd hello-fhevm
 ```
 
 **1.4. Install Dependencies:** Before we install dependencies, let's briefly look at the structure of the project. Here's what the file tree looks like inside your local clone of the repo:
 
 ```
-<your-new-repo-name>/
+hello-fhevm/
 ├── LICENSE
 ├── README.md
 ├── package-lock.json

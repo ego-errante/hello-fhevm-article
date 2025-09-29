@@ -25,7 +25,7 @@
     git clone <your-repo-link>
     cd <your-repo-folder>
     ```
-2.  **Install Dependencies:** Explain the project structure (`contracts` for the Hardhat project and `hello-fhevm-client/packages/site` for the Next.js frontend) and provide commands to install dependencies for both.
+2.  **Install Dependencies:** Explain the project structure (`contracts` for the Hardhat project and `hello-fhevm/packages/site` for the Next.js frontend) and provide commands to install dependencies for both.
 
     ```bash
     # For the smart contract
@@ -33,7 +33,7 @@
     npm install
 
     # For the frontend
-    cd ../hello-fhevm-client/packages/site
+    cd ../hello-fhevm/packages/site
     npm install
     ```
 

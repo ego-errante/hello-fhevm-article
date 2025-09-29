@@ -42,11 +42,11 @@ func.tags = ["RockPaperScissors"];
 
 Now it deploys `RockPaperScissors.sol` instead of the old `FHECounter.sol`.
 
-`postDeploy` function defined in `hello-fhevm-client/packages/postdeploy/index.ts` is a helper function that generates the ABI and address files (`RockPaperScissorsABI.ts` and `RockPaperScissorsAddresses.ts`) used by the frontend. It also puts them in the right location so after deployment, the frontend 'just works'.
+`postDeploy` function defined in `hello-fhevm/packages/postdeploy/index.ts` is a helper function that generates the ABI and address files (`RockPaperScissorsABI.ts` and `RockPaperScissorsAddresses.ts`) used by the frontend. It also puts them in the right location so after deployment, the frontend 'just works'.
 
 **4.2. Deploy the Contract to Ethereum Sepolia Testnet**
 
-All this commands are run from local repo root - `<your-new-repo-name>/` since it is a monorepo.
+All this commands are run from local repo root - `hello-fhevm/` since it is a monorepo.
 
 Run:
 

@@ -17,9 +17,9 @@ npm install @tanstack/react-query react-icons
 
 This installs `@tanstack/react-query` for clean request management and `react-icons` to provide visual icons for our game interface.
 
-**3.2. Update `@packages/site/providers.tsx`**
+**3.2. Update `hello-fhevm/packages/site/providers.tsx`**
 
-Update your `@packages/site/providers.tsx` to the below:
+Update your `hello-fhevm/packages/site/providers.tsx` to the below:
 
 ```typescript
 "use client";
@@ -73,7 +73,7 @@ Now that our application is set up with providers, let's look at the heart of ou
 
 ![Frontend hooks architecture](./frontend%20hooks%20architecture.svg)
 
-```typescript:hello-fhevm-client/packages/site/hooks/useRockPaperScissors/useRockPaperScissors.tsx
+```typescript:hello-fhevm/packages/site/hooks/useRockPaperScissors/useRockPaperScissors.tsx
 "use client";
 
 import { ethers } from "ethers";
@@ -249,7 +249,7 @@ By structuring our code this way, we achieve a clean separation of concerns. In 
 
 The first specialized hook our orchestrator uses is `useGameState`. Before our app can display anything meaningful, it needs to know the current state of the game on the blockchain. Is there a game running? Is the current user one of the players? This hook is responsible for answering those questions.
 
-```typescript:hello-fhevm-client/packages/site/hooks/useRockPaperScissors/useGameState.ts
+```typescript:hello-fhevm/packages/site/hooks/useRockPaperScissors/useGameState.ts
 import { ethers } from "ethers";
 import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -442,7 +442,7 @@ See [tanstack query docs](https://tanstack.com/query/latest/docs/framework/react
 
 Now that our application can read the game's state, we need to give players a way to interact with it. The `useGameActions` hook is responsible for all "write" operations—actions that change the state of our smart contract. This includes creating a new game and, most importantly, submitting a player's move.
 
-```typescript:hello-fhevm-client/packages/site/hooks/useRockPaperScissors/useGameActions.ts
+```typescript:hello-fhevm/packages/site/hooks/useRockPaperScissors/useGameActions.ts
 import { ethers } from "ethers";
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -680,7 +680,7 @@ This hook perfectly illustrates the first half of the FHEVM workflow: encrypting
 
 Our players have made their moves, and the smart contract has confidentially determined the winner. But the result is still an encrypted secret on the blockchain. The `useGameResults` hook is responsible for the final, and most rewarding, step: securely revealing the outcome to the players.
 
-```typescript:hello-fhevm-client/packages/site/hooks/useRockPaperScissors/useGameResults.ts
+```typescript:hello-fhevm/packages/site/hooks/useRockPaperScissors/useGameResults.ts
 import { ethers } from "ethers";
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -914,9 +914,9 @@ We have gone through the hooks that power the frontend of our dApp. They impleme
 
 First we need to prepare the entry points to our UI components. These are mainly boilerplate code changes:
 
-Starting with our layout file in `packages/site/app/layout.tsx`. Copy this code:
+Starting with our layout file in `hello-fhevm/packages/site/app/layout.tsx`. Copy this code:
 
-```typescript:hello-fhevm-client/packages/site/app/layout.tsx
+```typescript:hello-fhevm/packages/site/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -973,9 +973,9 @@ function AppLogo() {
 
 We made a few changes: added a new font (`Funnel_Sans`), and updated the metadata and app logo to better match our dApp.
 
-Next, we'll set up the main page of our site, `packages/site/app/page.tsx`. Copy this code
+Next, we'll set up the main page of our site, `hello-fhevm/packages/site/app/page.tsx`. Copy this code
 
-```typescript:hello-fhevm-client/packages/site/app/page.tsx
+```typescript:hello-fhevm/packages/site/app/page.tsx
 import { RockPaperScissorsDemo } from "@/components/RockPaperScissorsDemo";
 
 export default function Home() {
@@ -995,9 +995,9 @@ We replaced the `FHECounterDemo` with our new `RockPaperScissorsDemo` component.
 
 We will now build our primary interactive component, `RockPaperScissorsDemo`, it doesn't render UI directly but it initializes our hooks and passes state and functions down to the presentational components.
 
-Let's create the file `packages/site/components/RockPaperScissorsDemo.tsx` and add this code:
+Let's create the file `hello-fhevm/packages/site/components/RockPaperScissorsDemo.tsx` and add this code:
 
-```typescript:hello-fhevm-client/packages/site/components/RockPaperScissorsDemo.tsx
+```typescript:hello-fhevm/packages/site/components/RockPaperScissorsDemo.tsx
 "use client";
 
 import { useFhevm } from "@fhevm/react";
@@ -1261,7 +1261,7 @@ The `GameStatusBoxSection` component is the main display panel for our game. It 
 
 It is made of three sub-components which are conditionally rendered depending on the player's role - `Player1View`, `Player2View` or`SpectatorView`. All of these are in the same file:
 
-Copy the following code into `packages/site/components/GameStatus.tsx`:
+Copy the following code into `hello-fhevm/packages/site/components/GameStatus.tsx`:
 
 ```typescript:hello-fhevm/packages/site/components/GameStatus.tsx
 import { FaCube, FaLock } from "react-icons/fa";
@@ -1609,9 +1609,9 @@ interface GameStatusBoxSectionProps {
 
 It also depends on a couple of components defined outside this file.
 
-`GameButton` is a reusuable button for game actions. Copy the code below into the file `packages/site/components/GameButton.tsx`:
+`GameButton` is a reusuable button for game actions. Copy the code below into the file `hello-fhevm/packages/site/components/GameButton.tsx`:
 
-```typescript:hello-fhevm-client/packages/site/components/GameButton.tsx
+```typescript:hello-fhevm/packages/site/components/GameButton.tsx
 export function GameButton({
   onClick,
   disabled = false,
@@ -1669,9 +1669,9 @@ export function ButtonContainer({ children }: { children: React.ReactNode }) {
 }
 ```
 
-`GameResult` displays the final outcome of the game. Copy the code below into the file `packages/site/components/GameResult.tsx`:
+`GameResult` displays the final outcome of the game. Copy the code below into the file `hello-fhevm/packages/site/components/GameResult.tsx`:
 
-```typescript:hello-fhevm-client/packages/site/components/GameResult.tsx
+```typescript:hello-fhevm/packages/site/components/GameResult.tsx
 import { GameRole } from "@/lib/types";
 import {
   FaHandRock,
@@ -1806,9 +1806,9 @@ When submitting a move or joining a game, the `RockPaperScissorsDemo` component 
 
 It is the final step in the UI before triggering client-side FHEVM encryption and submitting the move on-chain transaction.
 
-Copy the following code into `packages/site/components/MoveSelector.tsx`:
+Copy the following code into `hello-fhevm/packages/site/components/MoveSelector.tsx`:
 
-```typescript:hello-fhevm-client/packages/site/components/MoveSelector.tsx
+```typescript:hello-fhevm/packages/site/components/MoveSelector.tsx
 import { FaHandRock, FaHandPaper, FaHandScissors } from "react-icons/fa";
 
 export function MoveButton({
@@ -1928,9 +1928,9 @@ The remaining components in `RockPaperScissorsDemo` play supporting roles in the
 
 `MessageSection` displays dynamic, contextual messages to the user like "[FHE::Arena] Initializing encrypted battleground..."
 
-Copy the following code into `packages/site/components/MessageSection.tsx`
+Copy the following code into `hello-fhevm/packages/site/components/MessageSection.tsx`
 
-```typescript:hello-fhevm-client/packages/site/components/MessageSection.tsx
+```typescript:hello-fhevm/packages/site/components/MessageSection.tsx
 import { printProperty } from "./DataDisplay";
 
 export function MessageSection({ message }: { message: string }) {
@@ -1944,9 +1944,9 @@ export function MessageSection({ message }: { message: string }) {
 
 `TechnicalDetailsSection` renders a collapsible panel for developers or curious users. It shows helpful debugging information like the connected `chainId`, wallet `accounts`, the `contractAddress`, and the `fhevmInstance` status.
 
-Copy this code for it and it's sub components into `packages/site/components/InfoPanels.tsx`
+Copy this code for it and it's sub components into `hello-fhevm/packages/site/components/InfoPanels.tsx`
 
-```typescript:hello-fhevm-client/packages/site/components/InfoPanels.tsx
+```typescript:hello-fhevm/packages/site/components/InfoPanels.tsx
 import { ethers } from "ethers";
 import { printProperty } from "./DataDisplay";
 import { FaBook, FaChevronDown } from "react-icons/fa";
@@ -2113,9 +2113,9 @@ export function TechnicalDetailsSection({
 }
 ```
 
-`TechnicalDetailsSection` also depends on functions defined in `packages/site/components/DataDisplay.tsx`. Copy this code for it into `packages/site/components/DataDisplay.tsx`:
+`TechnicalDetailsSection` also depends on functions defined in `hello-fhevm/packages/site/components/DataDisplay.tsx`. Copy this code for it into `hello-fhevm/packages/site/components/DataDisplay.tsx`:
 
-```typescript:hello-fhevm-client/packages/site/components/DataDisplay.tsx
+```typescript:hello-fhevm/packages/site/components/DataDisplay.tsx
 export function printProperty(name: string, value: unknown) {
   let displayValue: string;
 
@@ -2161,7 +2161,7 @@ export function printBooleanProperty(name: string, value: boolean) {
 
 `ConnectButton` initiates the wallet connection flow.
 
-```typescript:hello-fhevm-client/packages/site/components/ConnectButton.tsx
+```typescript:hello-fhevm/packages/site/components/ConnectButton.tsx
 export function ConnectButton({
   isConnected,
   connect,
@@ -2187,7 +2187,7 @@ export function ConnectButton({
 
 `ErrorNotDeployed` displays a helpful message about the contract not being found on the current network.
 
-```typescript:hello-fhevm-client/packages/site/components/ErrorNotDeployed.tsx
+```typescript:hello-fhevm/packages/site/components/ErrorNotDeployed.tsx
 export function ErrorNotDeployed({ chainId }: { chainId: number | undefined }) {
   return (
     <div className="grid w-full gap-4 mx-auto font-semibold bg-none">
@@ -2206,7 +2206,7 @@ export function ErrorNotDeployed({ chainId }: { chainId: number | undefined }) {
           <span className="font-mono bg-white">RockPaperScissors.sol</span>{" "}
           contract has either not been deployed yet, or the deployment address
           is missing from the ABI directory{" "}
-          <span className="font-mono bg-white">root/packages/site/abi</span>. To
+          <span className="font-mono bg-white">hello-fhevm/packages/site/abi</span>. To
           deploy{" "}
           <span className="font-mono bg-white">RockPaperScissors.sol</span> on
           Sepolia, run the following command:
@@ -2234,13 +2234,13 @@ These components complete the application's UI. They are not directly involved i
 
 **3.7.6. Shared Utilities: The `/lib` Directory**
 
-Before we conclude, let's add the shared Typescript types and constants used across the frontend in `packages/site/lib`.
+Before we conclude, let's add the shared Typescript types and constants used across the frontend in `hello-fhevm/packages/site/lib`.
 
 Create the following files and copy this code in them:
 
-`packages/site/lib/types.ts`
+`hello-fhevm/packages/site/lib/types.ts`
 
-```typescript:hello-fhevm-client/packages/site/lib/types.ts
+```typescript:hello-fhevm/packages/site/lib/types.ts
 import { GAME_ROLE, GAME_STATUS } from "./constants";
 import { RockPaperScissorsABI } from "@/abi/RockPaperScissorsABI";
 
@@ -2273,9 +2273,9 @@ export type RockPaperScissorsInfoType = {
 };
 ```
 
-`packages/site/lib/constants.ts`
+`hello-fhevm/packages/site/lib/constants.ts`
 
-```typescript:hello-fhevm-client/packages/site/lib/constants.ts
+```typescript:hello-fhevm/packages/site/lib/constants.ts
 import { RockPaperScissorsABI } from "@/abi/RockPaperScissorsABI";
 
 /**
