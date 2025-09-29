@@ -2951,7 +2951,7 @@ npm run dev:mock
 
 **4.5. Game play**
 
-In the gif below, I use two browsers instances to show a game between two imaginary players A and B. Player A (left screen) plays Paper, player B (right screen) plays rock resolving the game. At the end, player B wins.
+In the gif below (it's been speed up to reduce the file size), I use two browsers instances to show a game between two imaginary players A and B. Player A (left screen) plays Paper, player B (right screen) plays rock resolving the game. At the end, player B wins.
 
 ![Game play demonstration](./rock-paper-scissors-demo-5x.gif)
 
