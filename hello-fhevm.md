@@ -2963,9 +2963,9 @@ Congratulations on building your first FHEVM dApp! Trying extending this with ne
 
 Again, here's a [link to the completed Github repo](https://github.com/ego-errante/hello-fhevm) and here's a [link to the deployed dApp](https://hello-fhevm.netlify.app/).
 
-To read up on Zama FHEVM tech or other technologies used in this application, check the references section below
+To read up on Zama FHEVM tech or other technologies used in this application, check the resources section below
 
-## References
+## Resources
 
 1. [Completed Hello FHEVM GitHub Repository](https://github.com/ego-errante/hello-fhevm)
 2. [Deployed Hello FHEVM Dapp](https://hello-fhevm.netlify.app/)
